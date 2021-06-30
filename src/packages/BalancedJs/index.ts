@@ -11,10 +11,14 @@ import Dex from './contracts/Dex';
 import Dividends from './contracts/Dividends';
 import Governance from './contracts/Governance';
 import ICX from './contracts/ICX';
+import IUSDC from './contracts/IUSDC';
 import Loans from './contracts/Loans';
+import OMM from './contracts/OMM';
+import OMM2 from './contracts/OMM2';
 import Rewards from './contracts/Rewards';
 import sICX from './contracts/sICX';
 import Staking from './contracts/Staking';
+import USDS from './contracts/USDS';
 import ContractSettings, { LedgerSettings } from './contractSettings';
 
 export type AccountType = string | undefined | null;
@@ -35,11 +39,16 @@ export class BalancedJs {
   networkId: NetworkId;
   provider: any;
 
-  // contracts
+  // token contracts
   BALN: BALN;
   sICX: sICX;
   bnUSD: bnUSD;
   ICX: ICX;
+  OMM: OMM;
+  OMM2: OMM2;
+  IUSDC: IUSDC;
+  USDS: USDS;
+  //
   Loans: Loans;
   Band: Band;
   Staking: Staking;
@@ -50,11 +59,14 @@ export class BalancedJs {
   Governance: Governance;
 
   static utils = {
-    toLoop(value: BigNumber | number | string): BigNumber {
-      return new BigNumber(value).times(LOOP).integerValue(BigNumber.ROUND_DOWN);
+    toLoop(value: BigNumber | number | string, currencyKey?: string): BigNumber {
+      if (currencyKey === 'IUSDC')
+        return new BigNumber(value).times(new BigNumber(10).pow(6)).integerValue(BigNumber.ROUND_DOWN);
+      else return new BigNumber(value).times(LOOP).integerValue(BigNumber.ROUND_DOWN);
     },
-    toIcx(value: BigNumber | number | string): BigNumber {
-      return new BigNumber(value).div(LOOP);
+    toIcx(value: BigNumber | number | string, currencyKey?: string): BigNumber {
+      if (currencyKey === 'IUSDC') return new BigNumber(value).div(new BigNumber(10).pow(6));
+      else return new BigNumber(value).div(LOOP);
     },
     POOL_IDS: {
       BALNsICX: 4,
@@ -88,6 +100,10 @@ export class BalancedJs {
     this.ICX = new ICX(this.contractSettings);
     this.bnUSD = new bnUSD(this.contractSettings);
     this.sICX = new sICX(this.contractSettings);
+    this.OMM = new OMM(this.contractSettings);
+    this.OMM2 = new OMM2(this.contractSettings);
+    this.IUSDC = new IUSDC(this.contractSettings);
+    this.USDS = new USDS(this.contractSettings);
 
     this.Loans = new Loans(this.contractSettings);
     this.Band = new Band(this.contractSettings);
